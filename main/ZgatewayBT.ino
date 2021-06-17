@@ -746,6 +746,12 @@ void BLEconnect() {
           BLEclient.publishData();
           break;
         }
+        case HHCCJCY01HHCC: {
+          HHCCJCY01HHCC_connect BLEclient(addr);
+          BLEclient.processActions(BLEactions);
+          BLEclient.publishData();
+          break;
+        }
         default:
           break;
       }
@@ -1108,7 +1114,7 @@ JsonObject& process_bledata(JsonObject& BLEdata) {
         Log.trace(F("mi flora data reading" CR));
         BLEdata.set("model", "HHCCJCY01HHCC");
         if (device->sensorModel == -1)
-          createOrUpdateDevice(mac, device_flags_init, HHCCJCY01HHCC);
+          createOrUpdateDevice(mac, device_flags_connect, HHCCJCY01HHCC);
         return process_sensors(2, BLEdata);
       }
       Log.trace(F("Is it a vegtrug ?" CR));

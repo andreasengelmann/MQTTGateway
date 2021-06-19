@@ -84,7 +84,7 @@ static bool oneWhite = false;
 int minRssi = abs(MinimumRSSI); //minimum rssi value
 
 void pubBTMainCore(JsonObject& data, bool haPresenceEnabled = true) {
-  if (abs((int)data["rssi"] | 0) < minRssi) {
+  if (abs((int)data["rssi"] | 0) < minRssi && data.containsKey("id")) {
     String mac_address = data["id"].as<const char*>();
     mac_address.replace(":", "");
     String mactopic = subjectBTtoMQTT + String("/") + mac_address;

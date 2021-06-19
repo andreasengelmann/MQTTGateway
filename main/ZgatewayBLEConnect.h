@@ -47,7 +47,5 @@ public:
   void publishData() override;
 };
 
-
-
 #endif //ESP32
 #endif //zBLEConnect_h

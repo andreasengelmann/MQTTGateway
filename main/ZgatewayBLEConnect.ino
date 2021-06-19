@@ -210,44 +210,6 @@ void DT24_connect::publishData() {
 }
 
 /*-----------------------HHCCJCY01HHCC HANDLING-----------------------*/
-void HHCCJCY01HHCC_connect::notifyCB(NimBLERemoteCharacteristic* pChar, uint8_t* pData, size_t length, bool isNotify) {
-  if (m_taskHandle == nullptr) {
-    return; // unexpected notification
-  }
-
-  if (!ProcessLock) {
-    Log.trace(F("Callback from %s characteristic" CR), pChar->getUUID().toString().c_str());
-    if (length == 20) {
-      m_data.assign(pData, pData + length);
-      return;
-    } else if (m_data.size() == 20 && length == 16) {
-      m_data.insert(m_data.end(), pData, pData + length);
-
-      Log.trace(F("Device identified creating BLE buffer" CR));
-      JsonObject& BLEdata = getBTJsonObject();
-      String mac_address = m_pClient->getPeerAddress().toString().c_str();
-      mac_address.toUpperCase();
-      BLEdata.set("model", "DT24");
-      BLEdata.set("id", (char*)mac_address.c_str());
-      Log.trace(F("Device identified in CB: %s" CR), (char*)mac_address.c_str());
-      BLEdata.set("volt", (float)(((m_data[4] * 256 * 256) + (m_data[5] * 256) + m_data[6]) / 10.0));
-      BLEdata.set("current", (float)(((m_data[7] * 256 * 256) + (m_data[8] * 256) + m_data[9]) / 1000.0));
-      BLEdata.set("power", (float)(((m_data[10] * 256 * 256) + (m_data[11] * 256) + m_data[12]) / 10.0));
-      BLEdata.set("energy", (float)(((m_data[13] * 256 * 256 * 256) + (m_data[14] * 256 * 256) + (m_data[15] * 256) + m_data[16]) / 100.0));
-      BLEdata.set("price", (float)(((m_data[17] * 256 * 256) + (m_data[18] * 256) + m_data[19]) / 100.0));
-
-      pubBT(BLEdata);
-    } else {
-      Log.notice(F("Invalid notification data" CR));
-      return;
-    }
-  } else {
-    Log.trace(F("Callback process canceled by processLock" CR));
-  }
-
-  xTaskNotifyGive(m_taskHandle);
-}
-
 void HHCCJCY01HHCC_connect::publishData() {
   NimBLEUUID serviceUUID("00001204-0000-1000-8000-00805f9b34fb");
   NimBLEUUID charUUID("00001a00-0000-1000-8000-00805f9b34fb");
@@ -266,6 +228,10 @@ void HHCCJCY01HHCC_connect::publishData() {
       const char* val2 = value.c_str();
       batteryValue = val2[0];
       JsonObject& BLEdata = getBTJsonObject();
+      String mac_address = m_pClient->getPeerAddress().toString().c_str();
+      mac_address.toUpperCase();
+      BLEdata.set("model", "HHCCJCY01HHCC");
+      BLEdata.set("id", (char*)mac_address.c_str());
       BLEdata.set("batt", (int)batteryValue);
       pubBT(BLEdata);
     } else {
